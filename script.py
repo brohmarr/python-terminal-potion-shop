@@ -20,7 +20,7 @@
 # [X] (1) You must create at least TWO classes;
 # [ ] (2) Each of those classes must have at least THREE attributes and
 #             THREE methods;
-# [ ] (3) Your classes should be able to describe themselves (through a
+# [X] (3) Your classes should be able to describe themselves (through a
 #             __repr__() method);
 # [ ] (4) Test all of the methods you created on at least TWO instances
 #             of every one of your classes;
@@ -29,27 +29,71 @@
 
 
 # This class represents the owner of the potion shop.
-class ShopKeeper:
+class Shopkeeper:
     def __init__(self, name: str, gold_owned: int):
         self.name = name
+        self.job = "Potion Seller"
         self.gold_owned = gold_owned
+    
+    def __repr__(self):
+        return "This is {name}, the {job}.".format(
+            name = self.name,
+            job = self.job
+        ) + " He doesn't seem very friendly..."
 
 # This class represents the potion shop itself.
 class PotionShop:
-    def __init__(self, name: str, owner: ShopKeeper):
+    def __init__(self, name: str, owner: Shopkeeper):
         self.name = name
         self.owner = owner
         # {(key = item_name: str): (value = quantity_in_stock: int)}
         self.inventory = {}
+    
+    def __repr__(self):
+        return "This is {owner}'s potion shop, {name}!".format(
+            owner = self.owner.name,
+            name = self.name
+        )
 
 # This class represents the items in the potion shop.
 class Item():
     def __init__(self, name: str, price: int):
         self.name = name
         self.price = price
+    
+    def __repr__(self):
+        return "This is a {name}, priced at {price} gold pieces.".format(
+            name = self.name, price = self.price
+        )
 
 # This class represents an adventurer (basically a client).
 class Adventurer:
-    def __init__(self, name: str, gold_owned: int):
+    def __init__(self, name: str, job: str, gold_owned: int):
         self.name = name
+        self.job = job
         self.gold_owned = gold_owned
+    
+    def __repr__(self):
+        return "This is {name}, the {job},".format(
+            name = self.name,
+            job = self.job
+        ) + " and he is heading into battle!"
+
+# TESTING PHASE
+print("\nInitializing Internal Testing...\n")
+
+print("Testing '__init__' and '__repr__' methods...\n")
+
+shopkeeper = Shopkeeper("Guy", 50)
+print(shopkeeper)
+
+potion_shop = PotionShop("Potion Place", shopkeeper)
+print(potion_shop)
+
+potion_of_health = Item("Potion of Health", 100)
+print(potion_of_health)
+
+adventurer = Adventurer("Chad", "Fighter", 500)
+print(adventurer)
+
+print("\nGreat success!\n")
