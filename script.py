@@ -17,7 +17,7 @@
 
 # Requirements:
 # 
-# [ ] (1) You must create at least TWO classes;
+# [X] (1) You must create at least TWO classes;
 # [ ] (2) Each of those classes must have at least THREE attributes and
 #             THREE methods;
 # [ ] (3) Your classes should be able to describe themselves (through a
@@ -28,4 +28,28 @@
 #             two Classes able to interact with each other.
 
 
-# Code here...
+# This class represents the owner of the potion shop.
+class ShopKeeper:
+    def __init__(self, name: str, gold_owned: int):
+        self.name = name
+        self.gold_owned = gold_owned
+
+# This class represents the potion shop itself.
+class PotionShop:
+    def __init__(self, name: str, owner: ShopKeeper):
+        self.name = name
+        self.owner = owner
+        # {(key = item_name: str): (value = quantity_in_stock: int)}
+        self.inventory = {}
+
+# This class represents the items in the potion shop.
+class Item():
+    def __init__(self, name: str, price: int):
+        self.name = name
+        self.price = price
+
+# This class represents an adventurer (basically a client).
+class Adventurer:
+    def __init__(self, name: str, gold_owned: int):
+        self.name = name
+        self.gold_owned = gold_owned
