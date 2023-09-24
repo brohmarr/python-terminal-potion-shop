@@ -40,26 +40,51 @@ class Shopkeeper:
             name = self.name,
             job = self.job
         )
+    
+    def greet_customer(self):
+        print("Well hello, my friend! Welcome to my humble potion shop."
+              + " What can I help you with today?")
 
 # This class represents the items in the potion shop.
 class Item():
-    def __init__(self, name: str, level: int, price: int):
+    def __init__(self, name: str, level: int, price: int, effect: str):
         self.name = name
         self.level = level
         self.price = price
+        self.effect = effect
     
     def __repr__(self):
         return "This is a Level {level} {name}, priced at {price}".format(
             name = self.name,
             level = self.level,
             price = self.price
-        ) + " gold pieces."
+        ) + " gold pieces. When used: {effect}".format(
+            effect = self.effect
+        )
+
+# This class represents an adventurer (basically a client).
+class Adventurer:
+    def __init__(self, name: str, job: str, gold_owned: int):
+        self.name = name
+        self.job = job
+        self.gold_owned = gold_owned
+    
+    def __repr__(self):
+        return "This is {name}, the {job},".format(
+            name = self.name,
+            job = self.job
+        ) + " and he is heading into battle!"
+    
+    def greet_potion_seller(self):
+        print("Hello, potion seller, I'm heading into battle, and I want"
+              + " only your strongest potions.")
 
 # This class represents the potion shop itself.
 class PotionShop:
-    def __init__(self, name: str, owner: Shopkeeper):
+    def __init__(self, name: str, owner: Shopkeeper, adventurer: Adventurer):
         self.name = name
         self.owner = owner
+        self.adventurer = adventurer
         # {(key = item_name: str): (value = quantity_in_stock: int)}
         self.inventory = {}
     
@@ -102,42 +127,51 @@ class PotionShop:
                 ) + " of that item. Would that be enough, adventurer?")
         else:
             print("Unfortunatelly, I'm out of that one.")
-
-# This class represents an adventurer (basically a client).
-class Adventurer:
-    def __init__(self, name: str, job: str, gold_owned: int):
-        self.name = name
-        self.job = job
-        self.gold_owned = gold_owned
     
-    def __repr__(self):
-        return "This is {name}, the {job},".format(
-            name = self.name,
-            job = self.job
-        ) + " and he is heading into battle!"
+    def print_chat_prefix(self, character):
+        print("<{character}> ".format(character = character.name), end = "")
+
+    def start_characters_interaction(self):
+        # Adventurer arrives at the potion shop...
+        print("{adventurer_name}, the fighter, arrives at the".format(
+            adventurer_name = self.adventurer.name
+        ) + " {potion_shop_name}...\n".format(
+            potion_shop_name = self.name
+        ))
+
+        # The owner greets the adventurer...
+        self.print_chat_prefix(self.owner)
+        self.owner.greet_customer()
+
+        # The adventurer greets the owner...
+        self.print_chat_prefix(adventurer)
+        self.adventurer.greet_potion_seller()
+
+        # Continue from here...
 
 # TESTING PHASE
 print("\nInitializing Internal Testing...\n")
 
-print("Testing '__init__' and '__repr__' methods...\n")
+print("Testing '__init__' and '__repr__' methods...")
 print("---\n")
 
 shopkeeper = Shopkeeper("Guy", 50)
 print(shopkeeper)
 
-potion_of_health = Item("Potion of Health", 99, 500)
+potion_of_health = Item("Potion of Health", 5, 50, "Recovers HP.")
 print(potion_of_health)
 
-potion_shop = PotionShop("Potion Place", shopkeeper)
-print(potion_shop)
-
-adventurer = Adventurer("Chad", "Fighter", 500)
+adventurer = Adventurer("Chad", "Fighter", 100)
 print(adventurer)
 
-print("\nGreat success!\n")
+potion_shop = PotionShop("Potion Place", shopkeeper, adventurer)
+print(potion_shop)
+
+print("\n---")
+print("Great success!")
 print("---\n")
 
-print("Testing the shop's inventory management...\n")
+print("Testing the shop's inventory management...")
 print("---\n")
 
 potion_shop.add_to_inventory(potion_of_health, 1)
@@ -152,5 +186,15 @@ potion_shop.remove_from_inventory(potion_of_health, 2)
 print()
 print(potion_shop.inventory)
 
-print("\nGreat success!\n")
+print("\n---")
+print("Great success!")
+print("---\n")
+
+print("Testing the characters interaction...")
+print("---\n")
+
+potion_shop.start_characters_interaction()
+
+print("\n---")
+print("Great success!")
 print("---\n")
