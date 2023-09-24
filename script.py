@@ -57,14 +57,17 @@ class PotionShop:
 
 # This class represents the items in the potion shop.
 class Item():
-    def __init__(self, name: str, price: int):
+    def __init__(self, name: str, level: int, price: int):
         self.name = name
+        self.level = level
         self.price = price
     
     def __repr__(self):
-        return "This is a {name}, priced at {price} gold pieces.".format(
-            name = self.name, price = self.price
-        )
+        return "This is a Level {level} {name}, priced at {price}".format(
+            name = self.name,
+            level = self.level,
+            price = self.price
+        ) + " gold pieces."
 
 # This class represents an adventurer (basically a client).
 class Adventurer:
@@ -90,7 +93,7 @@ print(shopkeeper)
 potion_shop = PotionShop("Potion Place", shopkeeper)
 print(potion_shop)
 
-potion_of_health = Item("Potion of Health", 100)
+potion_of_health = Item("Potion of Health", 99, 500)
 print(potion_of_health)
 
 adventurer = Adventurer("Chad", "Fighter", 500)
