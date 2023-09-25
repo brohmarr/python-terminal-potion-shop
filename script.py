@@ -44,6 +44,18 @@ class Shopkeeper:
     def greet_customer(self):
         print("Well hello, my friend! Welcome to my humble potion shop."
               + " What can I help you with today?")
+    
+    def respond_the_customer(self):
+        print("Of course! This is what I have in stock today.")
+    
+    def try_to_sell(self):
+        print("So, which one?")
+    
+    def ask_for_the_quantity(self):
+        print("How many?")
+    
+    def item_not_in_stock(self):
+        print("Unfortunatelly, I don't have that one.")
 
 # This class represents the items in the potion shop.
 class Item():
@@ -95,106 +107,148 @@ class PotionShop:
         )
     
     def is_item_in_stock(self, item:Item):
-        if item.name in self.inventory:
-            return True
-        else:
-            return False
+        for potion in self.inventory:
+            if item.name.lower() == potion.name.lower():
+                return True
+        return False
 
-    def add_to_inventory(self, item: Item, amount: int):
+    def add_to_inventory(self, item: Item, quantity: int):
         if self.is_item_in_stock(item):
-            self.inventory[item.name] += amount
+            self.inventory[item] += quantity
         else:
-            self.inventory[item.name] = amount
-        print("Added {amount}x [{item_name}] to the stock!".format(
-                amount = amount,
+            self.inventory[item] = quantity
+        print("Added {quantity}x [{item_name}] to the stock!".format(
+                quantity = quantity,
                 item_name = item.name
             ))
     
-    def remove_from_inventory(self, item: Item, amount: int):
+    def remove_from_inventory(self, item: Item, quantity: int):
         if item.name in self.inventory:
-            if self.inventory[item.name] >= amount:
-                if self.inventory[item.name] > amount:
-                    self.inventory[item.name] -= amount
+            if self.inventory[item] >= quantity:
+                if self.inventory[item] > quantity:
+                    self.inventory[item] -= quantity
                 else:
-                    self.inventory.pop(item.name)
-                print("Here you go, {amount}x [{item_name}]!".format(
-                    amount = amount,
+                    self.inventory.pop(item)
+                print("Here you go, {quantity}x [{item_name}]!".format(
+                    quantity = quantity,
                     item_name = item.name
                 ))
             else:
-                print("I can only sell you {inventory_amount}".format(
-                    inventory_amount = self.inventory[item.name]
+                print("I can only sell you {quantity_in_stock}".format(
+                    quantity_in_stock = self.inventory[item]
                 ) + " of that item. Would that be enough, adventurer?")
         else:
-            print("Unfortunatelly, I'm out of that one.")
+            self.owner.item_not_in_stock()
     
-    def print_chat_prefix(self, character):
+    def display_inventory(self):
+        print()
+        for item in self.inventory:
+            print("[{name}] - Level {level} ~ {price} G".format(
+                name = item.name,
+                level = item.level,
+                price = item.price
+            ))
+        print()
+
+    def display_chat_prefix(self, character):
         print("<{character}> ".format(character = character.name), end = "")
 
     def start_characters_interaction(self):
+        # Restocking...
+        self.add_to_inventory(Item("Lesser Potion of Health", 5, 50,
+                                   "Recovers a small amount of HP."), 6)
+        self.add_to_inventory(Item("Potion of Health", 15, 100,
+                                   "Recovers a decent amount of HP."), 4)
+        self.add_to_inventory(Item("Greater Potion of Health", 25, 200,
+                                   "Recovers a large amount of HP."), 2)
+        
         # Adventurer arrives at the potion shop...
-        print("{adventurer_name}, the fighter, arrives at the".format(
+        print("\n{adventurer_name}, the fighter, arrives at the".format(
             adventurer_name = self.adventurer.name
         ) + " {potion_shop_name}...\n".format(
             potion_shop_name = self.name
         ))
 
         # The owner greets the adventurer...
-        self.print_chat_prefix(self.owner)
+        self.display_chat_prefix(self.owner)
         self.owner.greet_customer()
 
         # The adventurer greets the owner...
-        self.print_chat_prefix(adventurer)
+        self.display_chat_prefix(self.adventurer)
         self.adventurer.greet_potion_seller()
 
-        # Continue from here...
+        # The owner responds the adventurer...
+        self.display_chat_prefix(self.owner)
+        self.owner.respond_the_customer()
 
-# TESTING PHASE
-print("\nInitializing Internal Testing...\n")
+        # Displaying the current inventory to the customer...
+        self.display_inventory()
 
-print("Testing '__init__' and '__repr__' methods...")
-print("---\n")
+        # The owner try to sell his potions...
+        self.display_chat_prefix(self.owner)
+        self.owner.try_to_sell()
 
-shopkeeper = Shopkeeper("Guy", 50)
-print(shopkeeper)
+        # Starting user interaction...
+        while True:
+            self.display_chat_prefix(self.adventurer)
+            decision = input("I want the ")
+            
+            if (decision.lower() == "lesser potion of health") or (decision.lower() == "potion of health") or (decision.lower() == "greater potion of health"):
+                self.display_chat_prefix(self.owner)
+                self.owner.ask_for_the_quantity()
+                break
+            else:
+                self.display_chat_prefix(self.owner)
+                self.owner.item_not_in_stock()
 
-potion_of_health = Item("Potion of Health", 5, 50, "Recovers HP.")
-print(potion_of_health)
+        self.display_chat_prefix(self.adventurer)
+        decision = input()
 
-adventurer = Adventurer("Chad", "Fighter", 100)
-print(adventurer)
+        # Check if the adventure have enough gold and wrap this up!
 
+# # TESTING PHASE
+# print("\nInitializing Internal Testing...\n")
+
+# print("Testing '__init__' and '__repr__' methods...")
+# print("---\n")
+
+# shopkeeper = Shopkeeper("Guy", 100)
+# print(shopkeeper)
+
+# potion_of_health = Item("Potion of Health", 5, 50, "Recovers HP.")
+# print(potion_of_health)
+
+# adventurer = Adventurer("Chad", "Fighter", 500)
+# print(adventurer)
+
+# potion_shop = PotionShop("Potion Place", shopkeeper, adventurer)
+# print(potion_shop)
+
+# print("\n---")
+# print("Great success!")
+# print("---\n")
+
+# print("Testing the shop's inventory management...")
+# print("---\n")
+
+# potion_shop.add_to_inventory(potion_of_health, 1)
+# print()
+# potion_shop.remove_from_inventory(potion_of_health, 2)
+# print()
+# potion_shop.add_to_inventory(potion_of_health, 1)
+# print()
+# print(potion_shop.inventory)
+# print()
+# potion_shop.remove_from_inventory(potion_of_health, 2)
+# print()
+# print(potion_shop.inventory)
+
+# print("\n---")
+# print("Great success!")
+# print("---\n")
+
+shopkeeper = Shopkeeper("Guy", 100)
+adventurer = Adventurer("Chad", "Fighter", 500)
 potion_shop = PotionShop("Potion Place", shopkeeper, adventurer)
-print(potion_shop)
-
-print("\n---")
-print("Great success!")
-print("---\n")
-
-print("Testing the shop's inventory management...")
-print("---\n")
-
-potion_shop.add_to_inventory(potion_of_health, 1)
-print()
-potion_shop.remove_from_inventory(potion_of_health, 2)
-print()
-potion_shop.add_to_inventory(potion_of_health, 1)
-print()
-print(potion_shop.inventory)
-print()
-potion_shop.remove_from_inventory(potion_of_health, 2)
-print()
-print(potion_shop.inventory)
-
-print("\n---")
-print("Great success!")
-print("---\n")
-
-print("Testing the characters interaction...")
-print("---\n")
 
 potion_shop.start_characters_interaction()
-
-print("\n---")
-print("Great success!")
-print("---\n")
