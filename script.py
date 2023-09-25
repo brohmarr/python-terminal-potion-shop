@@ -18,15 +18,32 @@
 # Requirements:
 # 
 # [X] (1) You must create at least TWO classes;
-# [ ] (2) Each of those classes must have at least THREE attributes and
+# [X] (2) Each of those classes must have at least THREE attributes and
 #             THREE methods;
 # [X] (3) Your classes should be able to describe themselves (through a
 #             __repr__() method);
-# [ ] (4) Test all of the methods you created on at least TWO instances
-#             of every one of your classes;
-# [ ] (5) Create some methods, or additional attributes, that make your
-#             two Classes able to interact with each other.
+# [X] (4) Test all of the methods you created on every one of your
+#             classes;
+# [X] (5) Create some methods, or additional attributes, that make two
+#             Classes able to interact with each other.
 
+
+# This class represents the items in the potion shop.
+class Item():
+    def __init__(self, name: str, level: int, price: int, effect: str):
+        self.name = name
+        self.level = level
+        self.price = price
+        self.effect = effect
+    
+    def __repr__(self):
+        return "This is a Level {level} {name}, priced at {price}".format(
+            name = self.name,
+            level = self.level,
+            price = self.price
+        ) + " gold pieces. When used: {effect}".format(
+            effect = self.effect
+        )
 
 # This class represents the owner of the potion shop.
 class Shopkeeper:
@@ -54,25 +71,19 @@ class Shopkeeper:
     def ask_for_the_quantity(self):
         print("How many?")
     
+    def sell_item(self, item_name: str, quantity: int):
+        print("Here you go, {quantity}x [{item_name}]!".format(
+                    quantity = quantity,
+                    item_name = item_name
+                ))
+
+    def not_enough_in_stock(self, inventory: dict, item: Item):
+        print("I can only sell you {quantity_in_stock}".format(
+                    quantity_in_stock = inventory[item]
+                ) + " of that item. Would that be enough, adventurer?")
+    
     def item_not_in_stock(self):
         print("Unfortunatelly, I don't have that one.")
-
-# This class represents the items in the potion shop.
-class Item():
-    def __init__(self, name: str, level: int, price: int, effect: str):
-        self.name = name
-        self.level = level
-        self.price = price
-        self.effect = effect
-    
-    def __repr__(self):
-        return "This is a Level {level} {name}, priced at {price}".format(
-            name = self.name,
-            level = self.level,
-            price = self.price
-        ) + " gold pieces. When used: {effect}".format(
-            effect = self.effect
-        )
 
 # This class represents an adventurer (basically a client).
 class Adventurer:
@@ -90,6 +101,12 @@ class Adventurer:
     def greet_potion_seller(self):
         print("Hello, potion seller, I'm heading into battle, and I want"
               + " only your strongest potions.")
+    
+    def not_enough_gold(self):
+        print("Wait... That's pretty expensive, I can't afford that...")
+    
+    def say_farewell(self):
+        print("Thank you, potion seller! You're much better than the other fool I visited before coming here!")
 
 # This class represents the potion shop itself.
 class PotionShop:
@@ -105,7 +122,7 @@ class PotionShop:
             owner = self.owner.name,
             name = self.name
         )
-    
+
     def is_item_in_stock(self, item:Item):
         for potion in self.inventory:
             if item.name.lower() == potion.name.lower():
@@ -123,23 +140,34 @@ class PotionShop:
             ))
     
     def remove_from_inventory(self, item: Item, quantity: int):
-        if item.name in self.inventory:
+        if item in self.inventory:
             if self.inventory[item] >= quantity:
                 if self.inventory[item] > quantity:
                     self.inventory[item] -= quantity
                 else:
                     self.inventory.pop(item)
-                print("Here you go, {quantity}x [{item_name}]!".format(
-                    quantity = quantity,
-                    item_name = item.name
-                ))
+                self.owner.sell_item(item.name, quantity)
+                
+                return True
+            
             else:
-                print("I can only sell you {quantity_in_stock}".format(
-                    quantity_in_stock = self.inventory[item]
-                ) + " of that item. Would that be enough, adventurer?")
+                self.owner.not_enough_in_stock(self.inventory, item)
+                
+                return False
         else:
             self.owner.item_not_in_stock()
+
+            return False
     
+    def check_if_adventurer_has_gold(self, cost: int):
+        if self.adventurer.gold_owned >= cost:
+            return True
+        else:
+            return False
+
+    def ask_the_user_for_another_input(self):
+        print("I'm sorry, I didn't quite understand that...")
+
     def display_inventory(self):
         print()
         for item in self.inventory:
@@ -153,58 +181,130 @@ class PotionShop:
     def display_chat_prefix(self, character):
         print("<{character}> ".format(character = character.name), end = "")
 
+    def close_sale(self, final_cost: int):
+        self.adventurer.gold_owned -= final_cost
+        self.owner.gold_owned += final_cost
+
+        self.display_chat_prefix(self.adventurer)
+        self.adventurer.say_farewell()
+
     def start_characters_interaction(self):
-        # Restocking...
-        self.add_to_inventory(Item("Lesser Potion of Health", 5, 50,
-                                   "Recovers a small amount of HP."), 6)
-        self.add_to_inventory(Item("Potion of Health", 15, 100,
-                                   "Recovers a decent amount of HP."), 4)
-        self.add_to_inventory(Item("Greater Potion of Health", 25, 200,
-                                   "Recovers a large amount of HP."), 2)
+        # Declaring available items...
+        lesser_health_potion = Item("Lesser Health Potion", 5, 50, "Recovers a small amount of HP.")
+        health_potion = Item("Health Potion", 15, 100, "Recovers a decent amount of HP.")
+        greater_health_potion = Item("Greater Health Potion", 25, 200, "Recovers a large amount of HP.")
         
-        # Adventurer arrives at the potion shop...
+        # Restocking...
+        self.add_to_inventory(lesser_health_potion, 2)
+        self.add_to_inventory(health_potion, 2)
+        self.add_to_inventory(greater_health_potion, 2)
+        
+        # The adventurer arrives at the potion shop.
         print("\n{adventurer_name}, the fighter, arrives at the".format(
             adventurer_name = self.adventurer.name
         ) + " {potion_shop_name}...\n".format(
             potion_shop_name = self.name
         ))
 
-        # The owner greets the adventurer...
+        # The owner greets the adventurer.
         self.display_chat_prefix(self.owner)
         self.owner.greet_customer()
 
-        # The adventurer greets the owner...
+        # The adventurer greets the owner.
         self.display_chat_prefix(self.adventurer)
         self.adventurer.greet_potion_seller()
 
-        # The owner responds the adventurer...
+        # The owner responds the adventurer.
         self.display_chat_prefix(self.owner)
         self.owner.respond_the_customer()
 
-        # Displaying the current inventory to the customer...
+        # Displays the current inventory to the user.
         self.display_inventory()
 
-        # The owner try to sell his potions...
+        # The owner tries to sell his potions.
         self.display_chat_prefix(self.owner)
         self.owner.try_to_sell()
 
-        # Starting user interaction...
-        while True:
+        # Starts the user interaction part.
+        is_sale_done = False
+
+        while not is_sale_done:
+            # Asks the user to choose an item to buy.
             self.display_chat_prefix(self.adventurer)
-            decision = input("I want the ")
+            desired_potion = input("I want the ")
             
-            if (decision.lower() == "lesser potion of health") or (decision.lower() == "potion of health") or (decision.lower() == "greater potion of health"):
-                self.display_chat_prefix(self.owner)
-                self.owner.ask_for_the_quantity()
-                break
+            if (desired_potion.lower() == "lesser health potion") or (desired_potion.lower() == "health potion") or (desired_potion.lower() == "greater health potion"):
+                # Gets the corresponding Item object.
+                if (desired_potion.lower() == "lesser health potion"):
+                    desired_potion = lesser_health_potion
+                elif (desired_potion.lower() == "health potion"):
+                    desired_potion = health_potion
+                else:
+                    desired_potion = greater_health_potion
+                
+                # Finds the chosen Item object in the inventory
+                #     dictionary.
+                for key in self.inventory:
+                    if key == desired_potion:
+                        desired_potion = key
+                
+                while True:
+                    # Asks the user how many of the chosen item they
+                    #     want to buy.
+                    self.display_chat_prefix(self.owner)
+                    self.owner.ask_for_the_quantity()
+
+                    while True:
+                        self.display_chat_prefix(self.adventurer)
+                        desired_quantity = input()
+
+                        # Checks if the user typed a valid answer (positive integer).
+                        if desired_quantity.isnumeric():
+                            desired_quantity = int(desired_quantity)
+
+                            # Checks if the adventurer has enough gold.
+                            final_cost = desired_potion.price * desired_quantity
+
+                            if self.check_if_adventurer_has_gold(final_cost):
+                                self.display_chat_prefix(self.owner)
+                                is_sale_done = self.remove_from_inventory(desired_potion, desired_quantity)
+
+                                # Checks for the owner's answer.
+                                if is_sale_done:
+                                    self.close_sale(final_cost)
+                                    
+                                    break
+                                else:
+                                    answer = ""
+                                    while True and answer.lower() != "no" and answer.lower() != "n":
+                                        self.display_chat_prefix(self.adventurer)
+                                        answer = input("(Yes/No) ")
+
+                                        if answer.lower() == "yes" or answer.lower() == "y":
+                                            self.close_sale(final_cost)
+                                            is_sale_done = True
+                                            
+                                            break
+                                        elif answer.lower() == "no" or answer.lower() == "n":
+                                            break
+                                        else:
+                                            self.display_chat_prefix(self.owner)
+                                            self.ask_the_user_for_another_input()
+                                    
+                                    break
+                            else:
+                                self.display_chat_prefix(self.adventurer)
+                                self.adventurer.not_enough_gold()
+                        else:
+                            self.display_chat_prefix(self.owner)
+                            self.ask_the_user_for_another_input()
+                    
+                    break
             else:
                 self.display_chat_prefix(self.owner)
                 self.owner.item_not_in_stock()
-
-        self.display_chat_prefix(self.adventurer)
-        decision = input()
-
-        # Check if the adventure have enough gold and wrap this up!
+        
+        print("\nTHE END\n")
 
 # # TESTING PHASE
 # print("\nInitializing Internal Testing...\n")
@@ -248,7 +348,7 @@ class PotionShop:
 # print("---\n")
 
 shopkeeper = Shopkeeper("Guy", 100)
-adventurer = Adventurer("Chad", "Fighter", 500)
+adventurer = Adventurer("Chad", "Fighter", 200)
 potion_shop = PotionShop("Potion Place", shopkeeper, adventurer)
 
 potion_shop.start_characters_interaction()
