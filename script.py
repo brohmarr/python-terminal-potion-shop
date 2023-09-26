@@ -1,4 +1,4 @@
-# Project: Python CLI Potion Shop
+# Project: Python Terminal Potion Shop
 # by: @Brohmarr
 
 # Welcome! You should now be equipped with everything you need to make a
